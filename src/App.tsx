@@ -86,22 +86,11 @@ const polylineOptions = {
 
 function App() {
 
-  const [gameState, setGameState] = useState<string>("game");
+  const [gameStatus, setGameStatus] = useState<string>("game");
 
   const [markers, setMarkers] = useState<{ [key: string]: any }>({
     "data": [
     {"ICAO":"1",  "position": [51.505, -0.09],   "name": "London", "type": "red" },
-    // {"ICAO":"2",  "position": [48.8566, 9.3522], "name": "Paris", "type": "diamond" },
-    // {"ICAO":"3",  "position": [40.7128, -4.006], "name": "New York", "type": "blue" },
-    // {"ICAO":"4",  "position": [40, 0],  "name": "4", "type": "red" },
-    // {"ICAO":"5",  "position": [40, 5],  "name": "5", "type": "blue" },
-    // {"ICAO":"6",  "position": [40, 6],  "name": "6", "type": "topaz" },
-    // {"ICAO":"7",  "position": [40, 7],  "name": "7", "type": "emerald" },
-    // {"ICAO":"8",  "position": [40, 8],  "name": "8", "type": "ruby" },
-    // {"ICAO":"9",  "position": [40, 9],  "name": "9", "type": "diamond" },
-    // {"ICAO":"10", "position": [40, 10], "name": "10", "type": "bandit" },
-    // {"ICAO":"11", "position": [40, 11], "name": "11", "type": "question" },
-    // {"ICAO":"12", "position": [40, 12], "name": "12", "type": "checked" },
   ]
   });
   const [paths, setPaths] = useState<[number, number][][]>([]);
@@ -119,7 +108,7 @@ function App() {
   // Расчёт всех путей
 
   const [visitedAirports,   setVisitedAirports] = useState<string[]>([]);
-  const [discoveredAirports,   setDiscoveredAirports] = useState<string[]>([]);
+  // const [discoveredAirports,   setDiscoveredAirports] = useState<string[]>([]);
 
   const [visitedPaths,   setVisitedPaths] = useState<[number, number][][]>([]);
   const [discoveredPaths,   setDiscoveredPaths] = useState<[number, number][][]>([]);
@@ -247,26 +236,26 @@ function App() {
       // console.log("Повторяющиеся строки:", duplicates);
 
 
-      // Генерация путей на основе icao_connections
-      const generatedPaths: [number, number][][] = data["icao_connections"].map(
-        (connection: [string, string]) => {
-          const [ICAO1, ICAO2] = connection;
-
-          // Найти координаты аэропортов по ICAO кодам
-          const airport1 = data["data"].find((airport: any) => airport.ICAO === ICAO1);
-          const airport2 = data["data"].find((airport: any) => airport.ICAO === ICAO2);
-
-          // Возвращаем путь (линия между двумя точками)
-          if (airport1 && airport2) {
-            return [airport1.position, airport2.position];
-          } else {
-            return null;
-          }
-        }
-      ).filter(Boolean);
-
-      // console.log("paths",paths)
-      setPaths(generatedPaths as [number, number][][]);
+      // // Генерация путей на основе icao_connections
+      // const generatedPaths: [number, number][][] = data["icao_connections"].map(
+      //   (connection: [string, string]) => {
+      //     const [ICAO1, ICAO2] = connection;
+      //
+      //     // Найти координаты аэропортов по ICAO кодам
+      //     const airport1 = data["data"].find((airport: any) => airport.ICAO === ICAO1);
+      //     const airport2 = data["data"].find((airport: any) => airport.ICAO === ICAO2);
+      //
+      //     // Возвращаем путь (линия между двумя точками)
+      //     if (airport1 && airport2) {
+      //       return [airport1.position, airport2.position];
+      //     } else {
+      //       return null;
+      //     }
+      //   }
+      // ).filter(Boolean);
+      //
+      // // console.log("paths",paths)
+      // setPaths(generatedPaths as [number, number][][]);
 
     } catch (error) {
       console.error('Failed to fetch markers:', error);
@@ -328,9 +317,9 @@ function App() {
       return updatedMarkers;
     });
 
-    setDiscoveredAirports((prevAirports) => [
-      ...new Set([...prevAirports, currentAirport.ICAO]),
-    ]);
+    // setDiscoveredAirports((prevAirports) => [
+    //   ...new Set([...prevAirports, currentAirport.ICAO]),
+    // ]);
 
     // setTimeout(() => {}, 1500);
 
@@ -413,7 +402,7 @@ function App() {
 
   // =================================================================
   // Расчёт расстояния да аэропорта
-  const [expectedDistance, setExpectedDistance] = useState<string>("0");
+  // const [expectedDistance, setExpectedDistance] = useState<string>("0");
 
   const findConnectionDistance = (
     aAirportICAO: string,
@@ -430,9 +419,9 @@ function App() {
     // Вернуть расстояние или "0", если соединение не найдено
     return connection ? connection[2].toString() : "0";
   };
-  useEffect(() => {
-    setExpectedDistance(findConnectionDistance(selectedAirport.ICAO,currentAirport.ICAO))
-  }, [selectedAirport]);
+  // useEffect(() => {
+  //   setExpectedDistance(findConnectionDistance(selectedAirport.ICAO,currentAirport.ICAO))
+  // }, [selectedAirport]);
   // =================================================================
 
 
@@ -519,9 +508,9 @@ function App() {
     else {setNewEvent(false);}
 
     if (currentAirport["type"] === "empty" || currentAirport["type"] === "home") {
-      setDiscoveredAirports((prevAirports) => [
-        ...new Set([...prevAirports, currentAirport.ICAO]),
-      ]);
+      // setDiscoveredAirports((prevAirports) => [
+      //   ...new Set([...prevAirports, currentAirport.ICAO]),
+      // ]);
 
       // Обновляем состояние currentAirport
       // const updatedAirport = { ...currentAirport, discovered: true };
@@ -552,7 +541,7 @@ function App() {
 
     // Проверка победы
     if (diamondFound && currentAirport["type"] === "home") {
-      setGameState("win");
+      setGameStatus("win");
     }
 
   }, [currentAirport]);
@@ -570,6 +559,76 @@ function App() {
 
 
 
+  // =================================================================
+  // Синхронизация данных
+  useEffect(() => {
+    const updateGameManager = async () => {
+      try {
+        const response = await fetch('http://localhost:4000/update_game_manager', {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            game_status: gameStatus,
+            current_money: currentMoney,
+            current_fuel: currentFuel,
+            currentAirport: currentAirport,
+            visitedAirports: visitedAirports,
+            visitedPaths: visitedPaths,
+            discoveredPaths: discoveredPaths,
+            suggestedPaths: suggestedPaths,
+            diamondFound: diamondFound
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to update game manager: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        console.log('Game manager updated:', result);
+      } catch (error) {
+        console.error('Error updating game manager:', error);
+      }
+    };
+
+    // Отправка данных при изменении зависимых переменных
+    updateGameManager();
+  }, [gameStatus, currentMoney, currentFuel, currentAirport, visitedAirports, visitedPaths, discoveredPaths, suggestedPaths, diamondFound]);
+
+  useEffect(() => {
+    const updateGameMarkers = async () => {
+      if (!markers || !markers.data || markers.data.length === 0) return;
+      console.log("updateGameMarkers:",markers)
+      try {
+        const response = await fetch('http://localhost:4000/update_game_markers', {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            markers: markers.data  // Отправка всего массива маркеров
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to update game markers: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        console.log('Game markers updated:', result);
+      } catch (error) {
+        console.error('Error updating game markers:', error);
+      }
+    };
+
+    updateGameMarkers();
+  }, [markers]);
+
+  // =================================================================
 
   // Пример изменения денег через каждые 2 секунды
   // useEffect(() => {
@@ -593,10 +652,13 @@ function App() {
 
   return (
     <div className="full_body">
-      <div className="header">
-        <h2>Afrikan Tähti</h2>
+      {!(markers && markers["icao_connections"] && currentAirport["position"]) && (
+      <div className="loading_screen"><div className="loading_screen_loader"></div></div>)}
 
-      </div>
+
+      {(markers && markers["icao_connections"] && currentAirport["position"]) && (<>
+      <div className="header"><h2>Afrikan Tähti</h2></div>
+
       <div className={"game_container"}>
         {markers && markers["data"] && markers["icao_connections"] && currentAirport["position"] && (
         <div className={"map_container"}>
@@ -655,7 +717,7 @@ function App() {
         </div>
         )}
 
-        {gameState === "game" && (
+        {gameStatus === "game" && (
         <div className={"control_container"}>
           <div className={"control_panel"}>
             <div className={"control_panel_header"}>Player Info<i className="bi bi-person-fill ml5"></i></div>
@@ -714,7 +776,7 @@ function App() {
 
           {markers["icao_connections"] && currentAirport["ICAO"] && (
             <div className={"control_panel"}>
-              <div className={"control_panel_header"}>Available Airports</div>
+              <div className={"control_panel_header"}>Available Airports<i className="bi bi-buildings-fill" style={{marginLeft:"10px"}}></i></div>
               {markers["icao_connections"]
                 .filter((icaoport:any) => icaoport.includes(currentAirport["ICAO"]))
                 .sort((a:any, b:any) => a[2] - b[2])
@@ -726,7 +788,7 @@ function App() {
                   // Если нашли другой аэропорт, отображаем его имя и расстояние
                   return (
                     otherAirport && (<>
-                      <div key={index} className={"control_panel_content_row airport_row_with_hover"} style={{backgroundColor: (selectedAirport === otherAirport) ? "#e4e4e4":""}}
+                      <div key={index} className={"control_panel_content_row airport_row_with_hover"} style={{backgroundColor: (selectedAirport === otherAirport) ? "#cccccc4d":""}}
                            onClick={()=>handleMarkerClick(otherAirport)}>
                         <div className={"control_panel_content_column"}>
                           <ReactTextTransition springConfig={presets.gentle} style={{minHeight:"50px", alignItems:"center"}}>{otherAirport.name}</ReactTextTransition>
@@ -817,10 +879,10 @@ function App() {
         </div>
         )}
 
-        {gameState !== "game" && (
+        {gameStatus !== "game" && (
         <div className={"control_container"}>
           <div className={"control_panel"}>
-            <div className={"control_panel_header"}>{gameState === "win" ? "You win":"You lose"}<i className="bi bi-person-fill ml5"></i></div>
+            <div className={"control_panel_header"}>{gameStatus === "win" ? "You win":"You lose"}<i className="bi bi-person-fill ml5"></i></div>
             <div className={"control_panel_content_row"}>
               <div className={"control_panel_content_column"}>{visitedAirports.length} {" Airports Visited"}</div>
             </div>
@@ -829,6 +891,7 @@ function App() {
         )}
 
       </div>
+      </>)}
 
     </div>
   );
