@@ -86,7 +86,19 @@ const polylineOptions = {
 
 function App() {
 
-  const [gameStatus, setGameStatus] = useState<string>("game");
+  const [gameStatus, setGameStatus] = useState<string>("loading");
+  const [gameUserName, setGameUserName] = useState<string>("");
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = event.target.value;
+    if (inputValue.length <= 6) {setGameUserName(inputValue);}
+  };
+  const gameStart = () => {
+    console.log("gameStart")
+    if (!(markers && markers["icao_connections"] && currentAirport["position"]) || gameUserName.length==0) return;
+    setGameStatus("game")
+  };
+
 
   const [markers, setMarkers] = useState<{ [key: string]: any }>({
     "data": [
@@ -572,6 +584,7 @@ function App() {
           },
           body: JSON.stringify({
             game_status: gameStatus,
+            game_user_name: gameUserName,
             current_money: currentMoney,
             current_fuel: currentFuel,
             currentAirport: currentAirport,
@@ -596,7 +609,8 @@ function App() {
 
     // Отправка данных при изменении зависимых переменных
     updateGameManager();
-  }, [gameStatus, currentMoney, currentFuel, currentAirport, visitedAirports, visitedPaths, discoveredPaths, suggestedPaths, diamondFound]);
+  }, [currentAirport]);
+  // }, [gameStatus, currentMoney, currentFuel, currentAirport, visitedAirports, visitedPaths, discoveredPaths, suggestedPaths, diamondFound]);
 
   useEffect(() => {
     const updateGameMarkers = async () => {
@@ -652,11 +666,23 @@ function App() {
 
   return (
     <div className="full_body">
-      {!(markers && markers["icao_connections"] && currentAirport["position"]) && (
-      <div className="loading_screen"><div className="loading_screen_loader"></div></div>)}
+      {/*{!(markers && markers["icao_connections"] && currentAirport["position"]) && (*/}
+      {/*<div className="loading_screen"><div className="loading_screen_loader"></div></div>)}*/}
+      {/*{!(markers && markers["icao_connections"] && currentAirport["position"]) && gameStatus==="loading" && (*/}
+      { gameStatus==="loading" && (
+      <div className="loading_screen">
+        <div className="loading_screen_loader"></div>
+        <input
+          className="loading_screen_name_input"
+          value={gameUserName}
+          onChange={handleInputChange}
+          maxLength={6} // Этот атрибут HTML также ограничивает ввод до 6 символов
+        />
+        <button className="loading_screen_start_button" onClick={()=>gameStart()}>Start</button>
+      </div>)}
 
-
-      {(markers && markers["icao_connections"] && currentAirport["position"]) && (<>
+      {/*{(markers && markers["icao_connections"] && currentAirport["position"]) && (<>*/}
+      {gameStatus!=="loading" && (<>
       <div className="header"><h2>Afrikan Tähti</h2></div>
 
       <div className={"game_container"}>
@@ -720,24 +746,29 @@ function App() {
         {gameStatus === "game" && (
         <div className={"control_container"}>
           <div className={"control_panel"}>
-            <div className={"control_panel_header"}>Player Info<i className="bi bi-person-fill ml5"></i></div>
+            <div className={"control_panel_header"}>Player Info<i className="bi bi-person-fill ml5"></i><p style={{marginLeft:"auto"}}>{gameUserName}</p></div>
             <div className={"control_panel_content_row"}>
               {/*<div className={"control_panel_content_column"}>{currentMoney}<i className="bi bi-currency-exchange ml5"></i></div>*/}
               <div className={"control_panel_content_column"} title={"Current Money"}>
                 {currentMoney.split("").map((txt, i) => (
-                  <ReactTextTransition key={i} delay={i * 100} className="big" inline>{txt}</ReactTextTransition>
+                  <ReactTextTransition key={"currentMoney"+i} delay={i * 100} className="big" inline>{txt}</ReactTextTransition>
                 ))}
                 <i className="bi bi-currency-exchange ml5" onClick={()=>setCurrentMoney((Number(currentMoney)+1000).toString())}></i></div>
               <div className={"control_panel_content_column"} title={"Current Fuel"}>
                 {currentFuel.split("").map((txt, i) => (
-                  <ReactTextTransition key={i} delay={i * 100} className="big" inline>{txt}</ReactTextTransition>
+                  <ReactTextTransition key={"currentFuel"+i} delay={i * 100} className="big" inline>{txt}</ReactTextTransition>
                 ))}
                 <i className="bi bi-fuel-pump-fill ml5"></i><p style={{marginLeft:"5px"}}>km</p>
               </div>
             </div>
             {/*<div className={"control_panel_content_row"}><div className={"control_panel_content_column"}>{currentAirport["name"]}</div></div>*/}
-            <div className={"control_panel_content_row"}><div className={"control_panel_content_column"}>
-                <ReactTextTransition springConfig={presets.gentle}>{currentAirport["name"] || "Loading..."}</ReactTextTransition></div></div>
+            <div className={"control_panel_content_row"}>
+              <div className={"control_panel_content_column"}>
+                <ReactTextTransition springConfig={presets.gentle} style={{minHeight:"50px", alignItems:"center"}}>{currentAirport["name"] || "Loading..."}</ReactTextTransition>
+                <img className={"iso_country_flag"} onClick={()=>window.open(currentAirport["wikipedia_link"], '_blank')} title={currentAirport["wikipedia_link"]}
+                     src={`https://flagsapi.com/${currentAirport["iso_country"]}/flat/64.png`}  />
+              </div>
+            </div>
           </div>
 
           <div className={"control_panel"}>
