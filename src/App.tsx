@@ -86,7 +86,7 @@ const polylineOptions = {
 
 function App() {
 
-  const [gameStatus, setGameStatus] = useState<string>("loading");
+  const [gameStatus, setGameStatus] = useState<string>("win");
   const [gameUserName, setGameUserName] = useState<string>("");
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,17 +95,28 @@ function App() {
   };
   const gameStart = () => {
     console.log("gameStart")
-    if (!(markers && markers["icao_connections"] && currentAirport["position"]) || gameUserName.length==0) return;
+    // if (!(markers && markers["icao_connections"] && currentAirport["position"]) || gameUserName.length==0) return;
     setGameStatus("game")
   };
 
-
-  const [markers, setMarkers] = useState<{ [key: string]: any }>({
-    "data": [
-    {"ICAO":"1",  "position": [51.505, -0.09],   "name": "London", "type": "red" },
-  ]
-  });
-  const [paths, setPaths] = useState<[number, number][][]>([]);
+  const [markers, setMarkers] = useState<{ [key: string]: any }>(
+{'data': [
+{'ICAO': 'AL-LA10', 'position': [60.085383, 19.15389], 'name': 'Gjirokastër Airfield', 'type': 'home', 'discovered': true, 'iso_country': 'AL', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Albania'},
+// {'ICAO': 'AL-LA10', 'position': [60.085383, 20.15389], 'name': 'Gjirokastër Airfield', 'type': 'empty', 'discovered': false, 'iso_country': 'AL', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Albania'},
+// {'ICAO': 'AL-LA10', 'position': [60.085383, 21.15389], 'name': 'Gjirokastër Airfield', 'type': 'empty', 'discovered': true, 'iso_country': 'AL', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Albania'},
+// {'ICAO': 'AL-LA10', 'position': [60.085383, 22.15389], 'name': 'Gjirokastër Airfield', 'type': 'topaz', 'discovered': true, 'iso_country': 'AL', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Albania'},
+// {'ICAO': 'AL-LA10', 'position': [60.085383, 23.15389], 'name': 'Gjirokastër Airfield', 'type': 'emerald', 'discovered': true, 'iso_country': 'AL', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Albania'},
+// {'ICAO': 'AL-LA10', 'position': [60.085383, 24.15389], 'name': 'Gjirokastër Airfield', 'type': 'ruby', 'discovered': true, 'iso_country': 'AL', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Albania'},
+// {'ICAO': 'AL-LA10', 'position': [60.085383, 25.15389], 'name': 'Gjirokastër Airfield', 'type': 'bandit', 'discovered': true, 'iso_country': 'AL', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Albania'},
+// {'ICAO': 'AL-LA10', 'position': [60.085383, 26.15389], 'name': 'Gjirokastër Airfield', 'type': 'diamond', 'discovered': true, 'iso_country': 'AL', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Albania'},
+{'ICAO': 'GR-0001', 'position': [40.8409569, 21.826057], 'name': 'Arnissa Airport', 'type': 'emerald', 'discovered': false, 'iso_country': 'GR', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Greece'}],
+  'icao_connections': [['AL-LA10', 'GR-0001', 651]]}
+  );
+  // const [markers, setMarkers] = useState<{ [key: string]: any }>({
+  //   "data": [
+  //   {"ICAO":"1",  "position": [51.505, -0.09],   "name": "London", "type": "red" },
+  // ]
+  // });
 
   const [currentMoney, setCurrentMoney] = useState<string>("12000");
   const [currentFuel, setCurrentFuel] = useState<string>("12000");
@@ -118,9 +129,7 @@ function App() {
 
   // =================================================================
   // Расчёт всех путей
-
   const [visitedAirports,   setVisitedAirports] = useState<string[]>([]);
-  // const [discoveredAirports,   setDiscoveredAirports] = useState<string[]>([]);
 
   const [visitedPaths,   setVisitedPaths] = useState<[number, number][][]>([]);
   const [discoveredPaths,   setDiscoveredPaths] = useState<[number, number][][]>([]);
@@ -169,11 +178,7 @@ function App() {
         })
         .filter(Boolean) as [number, number][][]
     );
-    // newDiscoveredPaths = newDiscoveredPaths.filter(
-    //   (path) => !visitedPaths.includes(path) && !currentAirportPaths.includes(path)
-    // );
 
-    // Убираем пути, которые уже есть в visitedPaths и currentAirportPaths
     // Уникальные пути в массиве (проблема дублирования путей)
     const uniquePaths = (paths: [number, number][][]) => {
       const pathStringSet = new Set<string>();
@@ -188,18 +193,6 @@ function App() {
         }
       });
     };
-    // Совпадение путей
-    const arePathsEqual = (path1: [number, number][], path2: [number, number][]) => {
-      if (path1.length !== path2.length) return false;
-      return path1.every((point, index) =>
-        point[0] === path2[index][0] && point[1] === path2[index][1]
-      );
-    };
-    // newDiscoveredPaths = uniquePaths(newDiscoveredPaths).filter(
-    //   (path) =>
-    //     !visitedPaths.some(visitedPath => arePathsEqual(path, visitedPath)) &&
-    //     !currentAirportPaths.some(currentPath => arePathsEqual(path, currentPath))
-    // );
 
     // console.log("visitedAirports:",visitedAirports)
     // console.log("visitedPaths:",visitedPaths)
@@ -235,39 +228,9 @@ function App() {
       const data = await response.json();
 
       console.log(data);
-      // setMarkers({"data": data.data});
       setMarkers(data);
       setCurrentAirport(data["data"].find((airport:any) => airport.type === "home"))
-      // console.log(data["data"].find((airport:any) => airport.type === "empty"))
 
-
-      // // Выводим в консоль повторяющиеся строки
-      // const connections = data["icao_connections"];  // Предполагается, что это массив подмассивов
-      // const sortedConnections = connections.map((conn:any) => conn.slice(0, 2).sort().join(','));
-      // const duplicates = sortedConnections.filter((conn:any, index:any, self:any) => self.indexOf(conn) !== index);
-      // console.log("Повторяющиеся строки:", duplicates);
-
-
-      // // Генерация путей на основе icao_connections
-      // const generatedPaths: [number, number][][] = data["icao_connections"].map(
-      //   (connection: [string, string]) => {
-      //     const [ICAO1, ICAO2] = connection;
-      //
-      //     // Найти координаты аэропортов по ICAO кодам
-      //     const airport1 = data["data"].find((airport: any) => airport.ICAO === ICAO1);
-      //     const airport2 = data["data"].find((airport: any) => airport.ICAO === ICAO2);
-      //
-      //     // Возвращаем путь (линия между двумя точками)
-      //     if (airport1 && airport2) {
-      //       return [airport1.position, airport2.position];
-      //     } else {
-      //       return null;
-      //     }
-      //   }
-      // ).filter(Boolean);
-      //
-      // // console.log("paths",paths)
-      // setPaths(generatedPaths as [number, number][][]);
 
     } catch (error) {
       console.error('Failed to fetch markers:', error);
@@ -500,19 +463,6 @@ function App() {
   useEffect(() => {
     if (!currentAirport || !currentAirport.ICAO) return;
 
-    // Обновляем markers["data"], устанавливая "discovered": true для текущего аэропорта
-    // setMarkers((prevMarkers) => {
-    //   const updatedData = prevMarkers.data.map((airport:any) =>
-    //     airport.ICAO === currentAirport.ICAO
-    //       ? { ...airport, discovered: true }
-    //       : airport
-    //   );
-    //
-    //   return {
-    //     ...prevMarkers,
-    //     data: updatedData,
-    //   };
-    // });
 
     if (currentAirport["discovered"] === false && currentAirport["type"] !== "empty" && currentAirport["type"] !== "home") {
       setNewEvent(true);
@@ -520,13 +470,6 @@ function App() {
     else {setNewEvent(false);}
 
     if (currentAirport["type"] === "empty" || currentAirport["type"] === "home") {
-      // setDiscoveredAirports((prevAirports) => [
-      //   ...new Set([...prevAirports, currentAirport.ICAO]),
-      // ]);
-
-      // Обновляем состояние currentAirport
-      // const updatedAirport = { ...currentAirport, discovered: true };
-      // setCurrentAirport(updatedAirport);
 
       // Обновляем markers
       setMarkers((prevMarkers) => {
@@ -545,8 +488,6 @@ function App() {
       });
     }
 
-    // console.log("currentAirport",currentAirport);
-    // console.log("setVisitedAirports",visitedAirports);
     setVisitedAirports((prevAirports) => [
       ...new Set([...prevAirports, currentAirport.ICAO]),
     ]);
@@ -666,9 +607,6 @@ function App() {
 
   return (
     <div className="full_body">
-      {/*{!(markers && markers["icao_connections"] && currentAirport["position"]) && (*/}
-      {/*<div className="loading_screen"><div className="loading_screen_loader"></div></div>)}*/}
-      {/*{!(markers && markers["icao_connections"] && currentAirport["position"]) && gameStatus==="loading" && (*/}
       { gameStatus==="loading" && (
       <div className="loading_screen">
         <div className="loading_screen_loader"></div>
@@ -681,7 +619,6 @@ function App() {
         <button className="loading_screen_start_button" onClick={()=>gameStart()}>Start</button>
       </div>)}
 
-      {/*{(markers && markers["icao_connections"] && currentAirport["position"]) && (<>*/}
       {gameStatus!=="loading" && (<>
       <div className="header"><h2>Afrikan Tähti</h2></div>
 
@@ -697,14 +634,6 @@ function App() {
             />
             <SetupPanes />
 
-            {/*{paths.map((path, index) => (*/}
-            {/*<Polyline key={index} positions={path} pathOptions={polylineOptions} />*/}
-            {/*))}*/}
-            {/*{visitedPaths.map((path, index) => (*/}
-            {/*  Array.isArray(path) && path.length > 1 ? (*/}
-            {/*    <Polyline key={index} positions={path} color={"green"} />*/}
-            {/*  ) : null*/}
-            {/*))}*/}{/**/}
             {discoveredPaths.map((path, index) => (
             <Polyline key={"discoveredPaths"+index} positions={path} pathOptions={{ ...polylineOptions, className: "discovered_path" }} pane="discoveredPane"  />
             ))}
@@ -735,7 +664,7 @@ function App() {
             )}
             {selectedAirport && selectedAirport["position"] && (
             <Marker key={"selectedAirportMarkerIcon"} position={selectedAirport["position"]} icon={selectedMarkerIcon}>
-              {/*<Tooltip><div className="custom-popup">Selected Airport - {findConnectionDistance(selectedAirport.ICAO,currentAirport.ICAO)} km</div></Tooltip>*/}
+
               <Tooltip><div className="custom-popup">Selected Airport {findConnectionDistance(selectedAirport.ICAO,currentAirport.ICAO) !== "0" ? `- ${findConnectionDistance(selectedAirport.ICAO,currentAirport.ICAO)} km` : ""}</div></Tooltip>
             </Marker>
             )}
@@ -748,7 +677,6 @@ function App() {
           <div className={"control_panel"}>
             <div className={"control_panel_header"}>Player Info<i className="bi bi-person-fill ml5"></i><p style={{marginLeft:"auto"}}>{gameUserName}</p></div>
             <div className={"control_panel_content_row"}>
-              {/*<div className={"control_panel_content_column"}>{currentMoney}<i className="bi bi-currency-exchange ml5"></i></div>*/}
               <div className={"control_panel_content_column"} title={"Current Money"}>
                 {currentMoney.split("").map((txt, i) => (
                   <ReactTextTransition key={"currentMoney"+i} delay={i * 100} className="big" inline>{txt}</ReactTextTransition>
@@ -845,7 +773,6 @@ function App() {
 
           {/*{selectedAirport && selectedAirport["name"] && (<div className={"control_panel"}>*/}
           {/*  <div className={"control_panel_header"}>Selected Airport <i className="bi bi-buildings-fill" style={{marginLeft:"10px"}}></i></div>*/}
-
           {/*  <div className={"control_panel_content_row"}>*/}
           {/*    <div className={"control_panel_content_column"}>*/}
           {/*      <ReactTextTransition springConfig={presets.gentle} style={{minHeight:"50px", alignItems:"center"}}>{selectedAirport["name"]}</ReactTextTransition>*/}
@@ -864,7 +791,6 @@ function App() {
           {/*  )}*/}
           {/*</div>)}*/}
 
-          {/*{1 && (*/}
           {newEvent && (
           <div className={"control_panel"}>
             <div className={"control_panel_header"}>Lootbox <i className="bi bi-box-seam-fill" style={{marginLeft:"10px"}}></i></div>

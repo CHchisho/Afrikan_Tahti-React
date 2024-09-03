@@ -1,46 +1,61 @@
-# Getting Started with Create React App
+# Afrikan Tähti - University Project
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project presents a browser-based version of the Finnish game "Afrikan Tähti". The objective of the game is to find the diamond and return it to the starting airport. Players can travel between airports in different countries, exchange currency, open loot boxes, and learn about various countries.
 
-## Available Scripts
+## Technical Components
 
-In the project directory, you can run:
+The frontend is implemented using **React Typescript**. The backend consists of a **Python Flask RestAPI**, which connects to a **MariaDB** database.
 
-### `npm start`
+## Implemented Game Elements
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+On the left, there is a map from the Leaflet library. All the game's **airports** are marked on it. There are several types of markers:
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+![img.png](README img/img.png)
 
-### `npm test`
+- **Home** - The starting airport
+- **?** - Unexplored airport
+- **✓✓** - Visited airport without a loot box
+- **Colored diamonds** - Topaz gives 300 coins, Emerald - 600, Ruby - 1000.
+- **Bandits** - They take all your money
+- **Diamond** - Does not give money. After finding it, you must return to the starting airport to complete the game.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+![img_1.png](README img/img_1.png)
 
-### `npm run build`
+Blue lines indicate available airports.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Green lines show the path traveled.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Gray dashed lines indicate all discovered but not yet visited paths.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Control Panel
 
-### `npm run eject`
+![img_2.png](README img/img_2.png)
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+- The Player Info section displays the current amount of money, remaining fuel, the current airport, and the country's flag.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- In the Money to Fuel section, the player can exchange money for fuel.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+- Available Airports displays the airports available for travel, as well as the flight cost.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+- The Lootbox panel allows opening loot boxes with either money or fuel.
 
-## Learn More
+![img_3.png](README img/img_3.png)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+The result will be displayed until the next flight.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## End of the Game
+
+After returning to the starting airport with the diamond, the player receives a victory panel and game statistics.
+
+![img_4.png](README img/img_4.png)
+
+## Backend
+
+Using **Flask**, an **API** was implemented to handle requests to the database. Game information generation was implemented:
+- Obtaining random airports.
+- Generating connections between airports.
+- Autosaving game session information.
+
+<br />
+<br />
+*P.S. The project was completed in 3 days.
