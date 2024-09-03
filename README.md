@@ -10,7 +10,7 @@ The frontend is implemented using **React Typescript**. The backend consists of 
 
 On the left, there is a map from the Leaflet library. All the game's **airports** are marked on it. There are several types of markers:
 
-![img.png](README img/img.png)
+![img.png](https://github.com/CHchisho/Afrikan_Tahti-React/blob/master/README%20img/img.png)
 
 - **Home** - The starting airport
 - **?** - Unexplored airport
@@ -19,17 +19,18 @@ On the left, there is a map from the Leaflet library. All the game's **airports*
 - **Bandits** - They take all your money
 - **Diamond** - Does not give money. After finding it, you must return to the starting airport to complete the game.
 
-![img_1.png](README img/img_1.png)
+##
+![img_1.png](https://github.com/CHchisho/Afrikan_Tahti-React/blob/master/README%20img/img_1.png)
 
-Blue lines indicate available airports.
+- Blue lines indicate available airports.
 
-Green lines show the path traveled.
+- Green lines show the path traveled.
 
-Gray dashed lines indicate all discovered but not yet visited paths.
+- Gray dashed lines indicate all discovered but not yet visited paths.
 
 ## Control Panel
 
-![img_2.png](README img/img_2.png)
+![img_2.png](https://github.com/CHchisho/Afrikan_Tahti-React/blob/master/README%20img/img_2.png)
 
 - The Player Info section displays the current amount of money, remaining fuel, the current airport, and the country's flag.
 
@@ -39,7 +40,7 @@ Gray dashed lines indicate all discovered but not yet visited paths.
 
 - The Lootbox panel allows opening loot boxes with either money or fuel.
 
-![img_3.png](README img/img_3.png)
+![img_3.png](https://github.com/CHchisho/Afrikan_Tahti-React/blob/master/README%20img/img_3.png)
 
 The result will be displayed until the next flight.
 
@@ -47,7 +48,7 @@ The result will be displayed until the next flight.
 
 After returning to the starting airport with the diamond, the player receives a victory panel and game statistics.
 
-![img_4.png](README img/img_4.png)
+![img_4.png](https://github.com/CHchisho/Afrikan_Tahti-React/blob/master/README%20img/img_4.png)
 
 ## Backend
 
