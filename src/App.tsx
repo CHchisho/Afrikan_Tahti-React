@@ -86,7 +86,7 @@ const polylineOptions = {
 
 function App() {
 
-  const [gameStatus, setGameStatus] = useState<string>("win");
+  const [gameStatus, setGameStatus] = useState<string>("loading");
   const [gameUserName, setGameUserName] = useState<string>("");
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,7 +95,7 @@ function App() {
   };
   const gameStart = () => {
     console.log("gameStart")
-    // if (!(markers && markers["icao_connections"] && currentAirport["position"]) || gameUserName.length==0) return;
+    if (!(markers && markers["icao_connections"] && currentAirport["position"]) || gameUserName.length==0) return;
     setGameStatus("game")
   };
 
