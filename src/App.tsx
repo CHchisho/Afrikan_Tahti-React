@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactTextTransition, { presets } from 'react-text-transition';
-import logo from './logo.svg';
 import './App.css';
+import { getDistance } from 'geolib';
 
+import currentMarkerImage from './img/current-marker.png';
+import selectedMarkerImage from './img/selected-marker.png';
 
 import { MapContainer, TileLayer, Marker, Popup, Polyline, Tooltip, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import {stringify} from "querystring";
 
 // Define custom panes
 const SetupPanes = () => {
@@ -24,17 +25,13 @@ const SetupPanes = () => {
 };
 // Иконка для маркера
 const currentMarkerIcon = new L.Icon({
-  // iconUrl: "https://cdn-icons-png.flaticon.com/128/5971/5971947.png",
-  iconUrl: "https://cdn-icons-png.flaticon.com/128/16982/16982672.png",
-  // iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-  // iconSize: [50, 50],
-  // iconAnchor: [25, 40],
+  iconUrl: currentMarkerImage,
   iconSize: [40, 40],
   iconAnchor: [6, 40],
 });
 // Иконка для маркера
 const selectedMarkerIcon = new L.Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/128/2776/2776000.png",
+  iconUrl: selectedMarkerImage,
   iconSize: [40, 40],
   iconAnchor: [20, 40],
 });
@@ -49,10 +46,6 @@ const createMarkerIcon = (type: string, discovered: boolean) => {
   }
 
   switch (type) {
-    case "red":
-      return L.divIcon({ className: "marker-icon marker-icon-red",iconSize: size,iconAnchor: anchor });
-    case "blue":
-      return L.divIcon({ className: "marker-icon marker-icon-blue",iconSize: size,iconAnchor: anchor });
     case "diamond":
       return L.divIcon({ className: "marker-icon marker-icon-diamond", html: '<i class="bi bi-gem"></i>',iconSize: size,iconAnchor: anchor });
     case "topaz":
@@ -63,8 +56,6 @@ const createMarkerIcon = (type: string, discovered: boolean) => {
       return L.divIcon({ className: "marker-icon marker-icon-ruby", html: '<i class="bi bi-x-diamond-fill"></i>',iconSize: size,iconAnchor: anchor });
     case "bandit":
       return L.divIcon({ className: "marker-icon marker-icon-bandit", html: '<i class="bi bi-person-fill-x"></i>',iconSize: size,iconAnchor: anchor });
-    // case "question":
-    //   return L.divIcon({ className: "marker-icon marker-icon-question", html: '<i class="bi bi-question-circle-fill"></i>',iconSize: size,iconAnchor: anchor });
     case "empty":
       return L.divIcon({ className: "marker-icon marker-icon-checked", html: '<i class="bi bi-check-all"></i>',iconSize: size,iconAnchor: anchor });
     case "home":
@@ -84,39 +75,74 @@ const polylineOptions = {
   dashOffset: "0",
 };
 
+
 function App() {
 
   const [gameStatus, setGameStatus] = useState<string>("loading");
-  const [gameUserName, setGameUserName] = useState<string>("");
+  // const [gameUserName, setGameUserName] = useState<string>("");
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = event.target.value;
-    if (inputValue.length <= 6) {setGameUserName(inputValue);}
-  };
+  // const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const inputValue = event.target.value;
+  //   if (inputValue.length <= 6) {setGameUserName(inputValue);}
+  // };
   const gameStart = () => {
     console.log("gameStart")
-    if (!(markers && markers["icao_connections"] && currentAirport["position"]) || gameUserName.length==0) return;
+    if (!(markers && markers["icao_connections"] && currentAirport["position"])) return;
     setGameStatus("game")
   };
 
   const [markers, setMarkers] = useState<{ [key: string]: any }>(
 {'data': [
-{'ICAO': 'AL-LA10', 'position': [60.085383, 19.15389], 'name': 'Gjirokastër Airfield', 'type': 'home', 'discovered': true, 'iso_country': 'AL', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Albania'},
-// {'ICAO': 'AL-LA10', 'position': [60.085383, 20.15389], 'name': 'Gjirokastër Airfield', 'type': 'empty', 'discovered': false, 'iso_country': 'AL', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Albania'},
-// {'ICAO': 'AL-LA10', 'position': [60.085383, 21.15389], 'name': 'Gjirokastër Airfield', 'type': 'empty', 'discovered': true, 'iso_country': 'AL', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Albania'},
-// {'ICAO': 'AL-LA10', 'position': [60.085383, 22.15389], 'name': 'Gjirokastër Airfield', 'type': 'topaz', 'discovered': true, 'iso_country': 'AL', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Albania'},
-// {'ICAO': 'AL-LA10', 'position': [60.085383, 23.15389], 'name': 'Gjirokastër Airfield', 'type': 'emerald', 'discovered': true, 'iso_country': 'AL', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Albania'},
-// {'ICAO': 'AL-LA10', 'position': [60.085383, 24.15389], 'name': 'Gjirokastër Airfield', 'type': 'ruby', 'discovered': true, 'iso_country': 'AL', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Albania'},
-// {'ICAO': 'AL-LA10', 'position': [60.085383, 25.15389], 'name': 'Gjirokastër Airfield', 'type': 'bandit', 'discovered': true, 'iso_country': 'AL', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Albania'},
-// {'ICAO': 'AL-LA10', 'position': [60.085383, 26.15389], 'name': 'Gjirokastër Airfield', 'type': 'diamond', 'discovered': true, 'iso_country': 'AL', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Albania'},
-{'ICAO': 'GR-0001', 'position': [40.8409569, 21.826057], 'name': 'Arnissa Airport', 'type': 'emerald', 'discovered': false, 'iso_country': 'GR', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Greece'}],
-  'icao_connections': [['AL-LA10', 'GR-0001', 651]]}
+{'ICAO': 'AL-LA10', 'position': [40.085383, 20.15389], 'name': 'Gjirokastër Airfield', 'type': 'empty', 'discovered': false, 'iso_country': 'AL', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Albania'},
+{'ICAO': 'AM-0001', 'position': [39.202272, 46.455204], 'name': 'Syunik Airport', 'type': 'empty', 'discovered': false, 'iso_country': 'AM', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Armenia'},
+{'ICAO': 'AT-0009', 'position': [48.657837, 16.540234], 'name': 'Ameis Airstrip', 'type': 'topaz', 'discovered': false, 'iso_country': 'AT', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Austria'},
+{'ICAO': 'AZ-0001', 'position': [40.4955422161, 49.9768066406], 'name': 'Zabrat Airport', 'type': 'bandit', 'discovered': false, 'iso_country': 'AZ', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Azerbaijan'},
+{'ICAO': 'BA-0001', 'position': [44.438152313232, 18.685613632202], 'name': 'Sport airfield Ciljuge', 'type': 'bandit', 'discovered': false, 'iso_country': 'BA', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Bosnia_and'},
+{'ICAO': 'EBAM', 'position': [50.740101, 3.4849], 'name': 'Amougies Airfield', 'type': 'empty', 'discovered': false, 'iso_country': 'BE', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Belgium'},
+{'ICAO': 'BG-0003', 'position': [42.414635, 27.294455], 'name': 'Trustikovo Airstrip', 'type': 'empty', 'discovered': false, 'iso_country': 'BG', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Bulgaria'},
+{'ICAO': 'BY-0001', 'position': [54.439999, 30.2967], 'name': 'Orsha Airport - Balbasovo Air Base', 'type': 'empty', 'discovered': false, 'iso_country': 'BY', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Belarus'},
+{'ICAO': 'CH-0002', 'position': [46.12338, 7.23425], 'name': 'Altiport de Croix de Coeur', 'type': 'empty', 'discovered': false, 'iso_country': 'CH', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Switzerlan'},
+{'ICAO': 'CY-0001', 'position': [35.106384, 33.321304], 'name': 'Lakatamia Airfield', 'type': 'empty', 'discovered': false, 'iso_country': 'CY', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Cyprus'},
+{'ICAO': 'CZ-0048', 'position': [50.2108813, 14.6574049], 'name': 'Borek', 'type': 'ruby', 'discovered': false, 'iso_country': 'CZ', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Czech_Repu'},
+{'ICAO': 'DE-0003', 'position': [49.853757, 8.586243], 'name': 'August-Euler Flugplatz', 'type': 'topaz', 'discovered': false, 'iso_country': 'DE', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Germany'},
+{'ICAO': 'DK-0001', 'position': [54.984115, 11.537662], 'name': 'Femø Airfield', 'type': 'emerald', 'discovered': false, 'iso_country': 'DK', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Denmark'},
+{'ICAO': 'EE-9278', 'position': [59.53670120239258, 26.31170082092285], 'name': 'Kunda Air Base', 'type': 'empty', 'discovered': false, 'iso_country': 'EE', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Estonia'},
+{'ICAO': 'ES-0001', 'position': [36.858888888900005, -6.13916666667], 'name': 'Trebujena Airfield', 'type': 'empty', 'discovered': false, 'iso_country': 'ES', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Spain'},
+{'ICAO': 'EFAA', 'position': [67.60359954833984, 23.97170066833496], 'name': 'Aavahelukka Airport', 'type': 'empty', 'discovered': false, 'iso_country': 'FI', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Finland'},
+{'ICAO': 'FR-0009', 'position': [44.601293, 3.927773], 'name': 'Altisurface Notre-Dame-des-Neiges-Abbaye', 'type': 'empty', 'discovered': false, 'iso_country': 'FR', 'wikipedia_link': 'https://en.wikipedia.org/wiki/France'},
+{'ICAO': 'Cark', 'position': [54.163753, -2.962299], 'name': 'Cark airfield', 'type': 'empty', 'discovered': false, 'iso_country': 'GB', 'wikipedia_link': 'https://en.wikipedia.org/wiki/United_Kin'},
+{'ICAO': 'GE-0006', 'position': [41.840599, 41.799461], 'name': 'Kobuleti Airfield', 'type': 'empty', 'discovered': false, 'iso_country': 'GE', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Georgia_(c'},
+{'ICAO': 'GR-0001', 'position': [40.8409569, 21.826057], 'name': 'Arnissa Airport', 'type': 'emerald', 'discovered': false, 'iso_country': 'GR', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Greece'},
+{'ICAO': 'HR-0001', 'position': [45.585, 17.211389], 'name': 'Daruvar', 'type': 'ruby', 'discovered': false, 'iso_country': 'HR', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Croatia'},
+{'ICAO': 'HU-0001', 'position': [46.803936, 20.527838], 'name': 'Kákahalom Airfield', 'type': 'home', 'discovered': false, 'iso_country': 'HU', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Hungary'},
+{'ICAO': 'EIAB', 'position': [53.59170150756836, -7.645559787750244], 'name': 'Abbeyshrule Aerodrome', 'type': 'empty', 'discovered': false, 'iso_country': 'IE', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Ireland'},
+{'ICAO': 'IT-0001', 'position': [45.268665, 7.947943], 'name': 'Aviosuperficie Il Falco', 'type': 'empty', 'discovered': false, 'iso_country': 'IT', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Italy'},
+{'ICAO': 'EYAL', 'position': [54.412525, 24.059929], 'name': 'Alytus Airfield', 'type': 'empty', 'discovered': false, 'iso_country': 'LT', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Lithuania'},
+{'ICAO': 'ELLX', 'position': [49.6233333, 6.2044444], 'name': 'Luxembourg-Findel International Airport', 'type': 'diamond', 'discovered': false, 'iso_country': 'LU', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Luxembourg'},
+{'ICAO': 'EVAD', 'position': [57.098598, 24.2658], 'name': 'Adazi Airfield', 'type': 'empty', 'discovered': false, 'iso_country': 'LV', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Latvia'},
+{'ICAO': 'LUBL', 'position': [47.843056, 27.777222], 'name': 'B?l?i International Airport', 'type': 'empty', 'discovered': false, 'iso_country': 'MD', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Moldova'},
+{'ICAO': 'LYBR', 'position': [42.8390007019043, 19.86199951171875], 'name': 'Berane Airport', 'type': 'empty', 'discovered': false, 'iso_country': 'ME', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Montenegro'},
+{'ICAO': 'LW66', 'position': [41.333099, 21.4491], 'name': 'Malo Konjari Sport Airfield', 'type': 'empty', 'discovered': false, 'iso_country': 'MK', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Macedonia'},
+{'ICAO': 'LMML', 'position': [35.857498, 14.4775], 'name': 'Malta International Airport', 'type': 'empty', 'discovered': false, 'iso_country': 'MT', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Malta'},
+{'ICAO': 'EHAL', 'position': [53.453612, 5.678396], 'name': 'Ameland Airfield', 'type': 'topaz', 'discovered': false, 'iso_country': 'NL', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Netherland'},
+{'ICAO': 'ENAE', 'position': [61.257401, 11.6689], 'name': 'Æra Airfield', 'type': 'bandit', 'discovered': false, 'iso_country': 'NO', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Norway'},
+{'ICAO': 'EPAR', 'position': [49.657501, 22.514298], 'name': 'Ar?amów Airport', 'type': 'empty', 'discovered': false, 'iso_country': 'PL', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Poland'},
+{'ICAO': 'ES-0025', 'position': [38.077502, -8.235832], 'name': 'Aerodromo de Figueira dos Cavaleiros', 'type': 'empty', 'discovered': false, 'iso_country': 'PT', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Portugal'},
+{'ICAO': 'LR79', 'position': [45.158699, 27.430901], 'name': 'Ianca Air Base', 'type': 'empty', 'discovered': false, 'iso_country': 'RO', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Romania'},
+{'ICAO': 'LY87', 'position': [44.7743, 20.9613], 'name': 'Kovin Airstrip', 'type': 'empty', 'discovered': false, 'iso_country': 'RS', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Serbia'},
+{'ICAO': 'UUWW', 'position': [55.5914993286, 37.2615013123], 'name': 'Vnukovo International Airport', 'type': 'empty', 'discovered': false, 'iso_country': 'RU', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Russia'},
+{'ICAO': 'ESCF', 'position': [58.40230178833008, 15.525699615478516], 'name': 'Malmen Air Base', 'type': 'empty', 'discovered': false, 'iso_country': 'SE', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Sweden'},
+{'ICAO': 'LJAJ', 'position': [45.889198, 13.8869], 'name': 'Ajdovš?ina Airfield', 'type': 'empty', 'discovered': false, 'iso_country': 'SI', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Slovenia'},
+{'ICAO': 'CZ-0052', 'position': [48.5992279, 21.1598857], 'name': 'Letisko Ve?ká Ida', 'type': 'empty', 'discovered': false, 'iso_country': 'SK', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Slovakia'},
+{'ICAO': 'LIKD', 'position': [43.948895, 12.511411], 'name': 'Torraccia Airfield', 'type': 'empty', 'discovered': false, 'iso_country': 'SM', 'wikipedia_link': 'https://en.wikipedia.org/wiki/San_Marino'},
+{'ICAO': 'LT86', 'position': [40.204498, 25.883302], 'name': 'Gökçeada Airport', 'type': 'empty', 'discovered': false, 'iso_country': 'TR', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Turkey'},
+{'ICAO': 'BY-0011', 'position': [50.3771921, 23.9648804], 'name': 'Aerodrom Belz', 'type': 'topaz', 'discovered': false, 'iso_country': 'UA', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Ukraine'},
+{'ICAO': 'BKPR', 'position': [42.5728, 21.035801], 'name': 'Priština Adem Jashari International Airp', 'type': 'emerald', 'discovered': false, 'iso_country': 'XK', 'wikipedia_link': 'https://en.wikipedia.org/wiki/Kosovo'}],
+  'icao_connections': [['AL-LA10', 'EBAM', 1754]
+
+  ]}
+
   );
-  // const [markers, setMarkers] = useState<{ [key: string]: any }>({
-  //   "data": [
-  //   {"ICAO":"1",  "position": [51.505, -0.09],   "name": "London", "type": "red" },
-  // ]
-  // });
 
   const [currentMoney, setCurrentMoney] = useState<string>("12000");
   const [currentFuel, setCurrentFuel] = useState<string>("12000");
@@ -124,6 +150,108 @@ function App() {
   const [currentAirport, setCurrentAirport] = useState<{ [key: string]: any }>({});
   // const [selectedAirport, setSelectedAirport] = useState<{ [key: string]: any }>({'ICAO': "choose_airport", 'position': [0, 0], 'name': 'Choose Airport', 'type': 'question'});
   const [selectedAirport, setSelectedAirport] = useState<{ [key: string]: any }>({});
+
+
+  const [diamondFound,   setDiamondFound] = useState<boolean>(false);
+
+
+  // =================================================================
+  // Генериция игры
+    useEffect(() => {
+
+    // Выбор случайных 20 городов
+    const shuffledCities = [...markers.data].sort(() => 0.5 - Math.random());
+    const selectedCities = shuffledCities.slice(0, 20);
+    // console.log(selectedCities);
+
+    // Распределение типов
+    const lootboxTypes: { [key: string]: number } = {
+      "topaz": 4,
+      "emerald": 3,
+      "ruby": 2,
+      "bandit": 3,
+      "diamond": 1,
+      "home": 1
+    };
+
+    const updatedCities = selectedCities.map((city, index) => {
+      for (const [type, count] of Object.entries(lootboxTypes)) {
+        if (count > 0) {
+          lootboxTypes[type] -= 1;
+          return { ...city, type: type };
+        }
+      }
+      return city; // Остальные города остаются с типом "empty"
+    });
+    // console.log("updatedCities",updatedCities);
+
+    // Генерация уникальных соединений
+    const connections: [string, string, number][] = [];
+    const cityConnections: { [key: string]: number } = {}; // Для отслеживания числа соединений каждого города
+
+    const getRandomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+    for (let i = 0; i < updatedCities.length; i++) {
+      const city1 = updatedCities[i];
+      cityConnections[city1.ICAO] = cityConnections[city1.ICAO] || 0;
+
+      // Генерация от 2 до 5 соединений для каждого города
+      const connectionsToCreate = getRandomInt(2, 5);
+
+      for (let j = i + 1; j < updatedCities.length && cityConnections[city1.ICAO] < connectionsToCreate; j++) {
+        const city2 = updatedCities[j];
+        cityConnections[city2.ICAO] = cityConnections[city2.ICAO] || 0;
+
+        // Проверяем, чтобы город 2 не превысил 4 соединений
+        if (cityConnections[city2.ICAO] < 5) {
+          // Рассчитываем расстояние и округляем до целого числа
+          const distance = Math.round(
+            getDistance(
+              { latitude: city1.position[0], longitude: city1.position[1] },
+              { latitude: city2.position[0], longitude: city2.position[1] }
+            ) / 1000
+          );
+
+          // Добавляем соединение в массив
+          connections.push([city1.ICAO, city2.ICAO, distance]);
+          cityConnections[city1.ICAO]++;
+          cityConnections[city2.ICAO]++;
+        }
+      }
+    }
+    // console.log("connections",connections);
+    // console.log("cityConnections",cityConnections);
+
+
+    // Обновляем состояние с новыми значениями типов и соединениями
+    setMarkers(prevState => ({
+      ...prevState,
+      data: updatedCities,
+      icao_connections: connections
+    }));
+
+    setCurrentAirport(updatedCities.find((airport:any) => airport.type === "home"))
+
+
+  }, []);
+
+  // =================================================================
+
+
+
+  // =================================================================
+  // Проверка на телефон
+  const [isDesktop, setIsDesktop] = useState<boolean>(false);
+
+  useEffect(() => {
+    const userAgent = navigator.userAgent || navigator.vendor ;
+
+    // Проверка на мобильные устройства
+    const isMobile = /android|iphone|ipad|ipod|windows phone|blackberry|mobile/i.test(userAgent);
+
+    setIsDesktop(!isMobile && window.innerWidth > 768);
+  }, []);
+  // =================================================================
 
 
 
@@ -238,8 +366,11 @@ function App() {
   };
 
   useEffect(() => {
-    fetchMarkers();
+    // fetchMarkers();
   }, []);
+
+
+
 
 
   const handleMarkerClick = (airport: any) => {
@@ -502,86 +633,80 @@ function App() {
 
 
 
-  // =================================================================
-  // Обработка победы
-
-  const [diamondFound,   setDiamondFound] = useState<boolean>(false);
-
-  // =================================================================
 
 
 
 
   // =================================================================
   // Синхронизация данных
-  useEffect(() => {
-    const updateGameManager = async () => {
-      try {
-        const response = await fetch('http://localhost:4000/update_game_manager', {
-          method: 'POST',
-          mode: 'cors',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            game_status: gameStatus,
-            game_user_name: gameUserName,
-            current_money: currentMoney,
-            current_fuel: currentFuel,
-            currentAirport: currentAirport,
-            visitedAirports: visitedAirports,
-            visitedPaths: visitedPaths,
-            discoveredPaths: discoveredPaths,
-            suggestedPaths: suggestedPaths,
-            diamondFound: diamondFound
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error(`Failed to update game manager: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-        console.log('Game manager updated:', result);
-      } catch (error) {
-        console.error('Error updating game manager:', error);
-      }
-    };
-
-    // Отправка данных при изменении зависимых переменных
-    updateGameManager();
-  }, [currentAirport]);
-  // }, [gameStatus, currentMoney, currentFuel, currentAirport, visitedAirports, visitedPaths, discoveredPaths, suggestedPaths, diamondFound]);
-
-  useEffect(() => {
-    const updateGameMarkers = async () => {
-      if (!markers || !markers.data || markers.data.length === 0) return;
-      console.log("updateGameMarkers:",markers)
-      try {
-        const response = await fetch('http://localhost:4000/update_game_markers', {
-          method: 'POST',
-          mode: 'cors',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            markers: markers.data  // Отправка всего массива маркеров
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error(`Failed to update game markers: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-        console.log('Game markers updated:', result);
-      } catch (error) {
-        console.error('Error updating game markers:', error);
-      }
-    };
-
-    updateGameMarkers();
-  }, [markers]);
+  // useEffect(() => {
+  //   const updateGameManager = async () => {
+  //     try {
+  //       const response = await fetch('http://localhost:4000/update_game_manager', {
+  //         method: 'POST',
+  //         mode: 'cors',
+  //         headers: {
+  //           'Content-Type': 'application/json'
+  //         },
+  //         body: JSON.stringify({
+  //           game_status: gameStatus,
+  //           game_user_name: gameUserName,
+  //           current_money: currentMoney,
+  //           current_fuel: currentFuel,
+  //           currentAirport: currentAirport,
+  //           visitedAirports: visitedAirports,
+  //           visitedPaths: visitedPaths,
+  //           discoveredPaths: discoveredPaths,
+  //           suggestedPaths: suggestedPaths,
+  //           diamondFound: diamondFound
+  //         })
+  //       });
+  //
+  //       if (!response.ok) {
+  //         throw new Error(`Failed to update game manager: ${response.statusText}`);
+  //       }
+  //
+  //       const result = await response.json();
+  //       console.log('Game manager updated:', result);
+  //     } catch (error) {
+  //       console.error('Error updating game manager:', error);
+  //     }
+  //   };
+  //
+  //   // Отправка данных при изменении зависимых переменных
+  //   updateGameManager();
+  // }, [currentAirport]);
+  // // }, [gameStatus, currentMoney, currentFuel, currentAirport, visitedAirports, visitedPaths, discoveredPaths, suggestedPaths, diamondFound]);
+  //
+  // useEffect(() => {
+  //   const updateGameMarkers = async () => {
+  //     if (!markers || !markers.data || markers.data.length === 0) return;
+  //     console.log("updateGameMarkers:",markers)
+  //     try {
+  //       const response = await fetch('http://localhost:4000/update_game_markers', {
+  //         method: 'POST',
+  //         mode: 'cors',
+  //         headers: {
+  //           'Content-Type': 'application/json'
+  //         },
+  //         body: JSON.stringify({
+  //           markers: markers.data  // Отправка всего массива маркеров
+  //         })
+  //       });
+  //
+  //       if (!response.ok) {
+  //         throw new Error(`Failed to update game markers: ${response.statusText}`);
+  //       }
+  //
+  //       const result = await response.json();
+  //       console.log('Game markers updated:', result);
+  //     } catch (error) {
+  //       console.error('Error updating game markers:', error);
+  //     }
+  //   };
+  //
+  //   updateGameMarkers();
+  // }, [markers]);
 
   // =================================================================
 
@@ -609,14 +734,11 @@ function App() {
     <div className="full_body">
       { gameStatus==="loading" && (
       <div className="loading_screen">
-        <div className="loading_screen_loader"></div>
-        <input
-          className="loading_screen_name_input"
-          value={gameUserName}
-          onChange={handleInputChange}
-          maxLength={6} // Этот атрибут HTML также ограничивает ввод до 6 символов
-        />
-        <button className="loading_screen_start_button" onClick={()=>gameStart()}>Start</button>
+        {/*<div className="loading_screen_loader"></div>*/}
+        <h2 style={{marginBottom:"10px", fontSize:"35px", color: "#69a4e8"}}>Afrikan Tähti</h2>
+        {isDesktop && (<button className="loading_screen_start_button" onClick={()=>gameStart()}>Start</button>)}
+        {!isDesktop && (<p style={{fontWeight:"600", fontSize:"20px", color:"#bebebe", textAlign:"center"}}>Sorry, phones are <br/>currently unsupported.<br/>😔</p>)}
+        <a href="https://chebanik.alwaysdata.net/" style={{marginTop:"20px", fontWeight:"600", color:"#bebebe", fontFamily:"Rubik, sans-serif", textDecoration:"none"}}>Made by Ilia Chebanik</a>
       </div>)}
 
       {gameStatus!=="loading" && (<>
@@ -647,7 +769,7 @@ function App() {
             {markers["data"].map((marker:any) => (
               <Marker key={marker.ICAO} position={marker.position} icon={createMarkerIcon(marker["type"], marker["discovered"])}
                 eventHandlers={{click: () => handleMarkerClick(marker),}}>
-                <Tooltip>{marker.type} = {marker.name} {findConnectionDistance(marker.ICAO,currentAirport.ICAO) !== "0" ? `- ${findConnectionDistance(marker.ICAO,currentAirport.ICAO)} km` : ""}</Tooltip>
+                <Tooltip>{marker.name} {findConnectionDistance(marker.ICAO,currentAirport.ICAO) !== "0" ? `- ${findConnectionDistance(marker.ICAO,currentAirport.ICAO)} km` : ""}</Tooltip>
                 {/*<Popup>*/}
                 {/*  <div className="custom-popup">*/}
                 {/*    {marker.name}*/}
@@ -675,7 +797,7 @@ function App() {
         {gameStatus === "game" && (
         <div className={"control_container"}>
           <div className={"control_panel"}>
-            <div className={"control_panel_header"}>Player Info<i className="bi bi-person-fill ml5"></i><p style={{marginLeft:"auto"}}>{gameUserName}</p></div>
+            <div className={"control_panel_header"}>Player Info<i className="bi bi-person-fill ml5"></i></div>
             <div className={"control_panel_content_row"}>
               <div className={"control_panel_content_column"} title={"Current Money"}>
                 {currentMoney.split("").map((txt, i) => (
@@ -693,7 +815,7 @@ function App() {
             <div className={"control_panel_content_row"}>
               <div className={"control_panel_content_column"}>
                 <ReactTextTransition springConfig={presets.gentle} style={{minHeight:"50px", alignItems:"center"}}>{currentAirport["name"] || "Loading..."}</ReactTextTransition>
-                <img className={"iso_country_flag"} onClick={()=>window.open(currentAirport["wikipedia_link"], '_blank')} title={currentAirport["wikipedia_link"]}
+                <img className={"iso_country_flag"} onClick={()=>window.open(`https://en.wikipedia.org/wiki/ISO_3166-2:${currentAirport["iso_country"]}`, '_blank')} title={`https://en.wikipedia.org/wiki/ISO_3166-2:${currentAirport["iso_country"]}`}
                      src={`https://flagsapi.com/${currentAirport["iso_country"]}/flat/64.png`}  />
               </div>
             </div>

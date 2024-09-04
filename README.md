@@ -2,6 +2,8 @@
 
 This project presents a browser-based version of the Finnish game "Afrikan Tähti". The objective of the game is to find the diamond and return it to the starting airport. Players can travel between airports in different countries, exchange currency, open loot boxes, and learn about various countries.
 
+You can test it out at the link: https://chebanik.alwaysdata.net/afrikan_tahti/
+
 ## Technical Components
 
 The frontend is implemented using **React Typescript**. The backend consists of a **Python Flask RestAPI**, which connects to a **MariaDB** database.

@@ -1,6 +1,7 @@
 /*474A51*/
 body {
     margin: 0; overflow-x: hidden !important;
+    font-family: Montserrat, Helvetica, Arial, Lucida, sans-serif;
 }
 h1,h2,h3,h4,h5,h6,p {margin: 0;}
 
@@ -18,7 +19,7 @@ h1,h2,h3,h4,h5,h6,p {margin: 0;}
     display: flex; flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: white;
+    background-color: #293133;
 }
 
 .loading_screen_loader {
@@ -75,28 +76,35 @@ h1,h2,h3,h4,h5,h6,p {margin: 0;}
 
 
 .loading_screen_name_input {
-    margin-top: 40px;
-    border-radius: 5px;
-    font-size: 17px;
+    background-color: #fbfbfb;
+    border: none;
+    border-bottom: .125rem solid #000;
+    border-radius: 5px 5px 0 0;
     font-weight: 600;
-    width: 80px;
+    height: 30px;
+    margin-right: 10px;
+    outline: none;
+    padding: 2px 5px 0;
     text-align: center;
-    padding: 5px;
-    animation: fadeIn 1s ease;
+    transition: all .3s ease;
+    width: 90px;
 }
 .loading_screen_start_button {
     margin-top: 5px;
-    border-radius: 5px;
+    width: 170px;
     border: none;
-    padding: 5px 25px;
-    font-size: 20px;
-    font-weight: 600;
+    border-radius: 5px;
+    color: #fff;
     cursor: pointer;
-    background-color: #4d9fff;
-    color: white;
-    animation: fadeIn 1s ease;
+    font-size: 16px;
+    font-weight: 600;
+    overflow: hidden;
+    padding: 7px 15px;
+    cursor: pointer;
+    background-color: #5a91d1;
+    opacity: 0.9;
 }
-.loading_screen_start_button:hover {opacity: 0.9;}
+.loading_screen_start_button:hover {opacity: 1;}
 
 .header {
     /*position: relative;*/
